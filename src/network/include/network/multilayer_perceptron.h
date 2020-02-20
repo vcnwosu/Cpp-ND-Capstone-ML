@@ -16,6 +16,7 @@
 #include <vector>
 #include <functional>
 #include "network/unit.h"
+#include "iris/dataset.h"
 
 namespace network {
     /**
@@ -46,7 +47,7 @@ namespace network {
                  *
                  * @param std::vector<std::vector<float>>
                  */
-                void train(std::vector<std::vector<float>> &v, int epochs, float l_rate, bool verbose);
+                void train(iris::dataset &data, int epochs, float l_rate, bool verbose);
 
                 /**
                  * Predict the label far a provided vector
@@ -55,7 +56,7 @@ namespace network {
                  *
                  * @return float the prediction
                  */
-                void predict(std::vector<float> &input);
+                std::vector<float> predict(std::vector<float> &input);
             private:
                 /**
                  * @var std::mt19937 _gen to generate random numbers for weights
@@ -92,6 +93,7 @@ namespace network {
                  *        the gradient
                  */
                 void _backpropagate(std::vector<float> &v, float error, float l_rate);
+                void _backpropagate(std::vector<float> &v, std::vector<float> &e, float l_rate);
 
                 /**
                  * Compute the dot product on two vectors

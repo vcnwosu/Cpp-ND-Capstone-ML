@@ -22,3 +22,8 @@ set_target_properties(neural_network_test PROPERTIES
 )
 target_include_directories(neural_network_test PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(neural_network_test neural_network)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/../iris ${PROJECT_SOURCE_DIR}/build)
+
+target_link_libraries(neural_network iris)
+target_link_libraries(neural_network_test iris)

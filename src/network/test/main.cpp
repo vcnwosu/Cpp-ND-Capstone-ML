@@ -48,17 +48,6 @@ int main(void) {
     brain.add_layer(10, network::activation::kind::RELU);
     brain.add_layer(3, network::activation::kind::SIGMOID);
 
-    std::vector<std::vector<float>> data{
-        {5.1, 3.5, 1.4, 0.2}, {1, 0, 0},
-        {7.0, 3.2, 4.7, 1.4}, {0, 1, 0},
-        {6.3, 3.3, 6.0, 2.5}, {0, 0, 1},
-        {4.6, 3.6, 1.0, 0.2}, {1, 0, 0},
-        {5.7, 2.6, 3.5, 1.0}, {0, 1, 0},
-        {7.7, 3.8, 6.7, 2.2}, {0, 0, 1},
-    };
-
-    brain.train(data, 5, 0.01, false);
-
     std::cout << " [PASS] " << std::endl;
 
     return 0;

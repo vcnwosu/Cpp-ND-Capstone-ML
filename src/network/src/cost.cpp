@@ -36,7 +36,7 @@ float network::cost::binary_cross_entropy(const float y, const float y_hat) {
  *
  * @return float the cross entropy result
  */
-float network::cost::cross_entropy(const std::vector<float> &y, const std::vector<float> &y_hat) {
+float network::cost::cross_entropy(const std::vector<int> &y, const std::vector<float> &y_hat) {
     float ce = 0.0f;
 
     for (int i = 0; i < y_hat.size(); i++) {
@@ -44,4 +44,22 @@ float network::cost::cross_entropy(const std::vector<float> &y, const std::vecto
     }
 
     return -ce;
+}
+
+/**
+ * Simple error calculation for each neuron in the output
+ *
+ * @param const std::vector<int> &y the known labels
+ * @param const std::vector<int> &y_hat the network output
+ *
+ * @return std::vector<float> the error for each output
+ */
+std::vector<float> network::cost::simple_error(const std::vector<int> &y, const std::vector<float> &y_hat) {
+    std::vector<float> res;
+
+    for (int i = 0; i < y.size(); i++) {
+        res.push_back(y[i] - y_hat[i]);
+    }
+
+    return res;
 }

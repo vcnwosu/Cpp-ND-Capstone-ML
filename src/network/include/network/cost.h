@@ -37,7 +37,17 @@ namespace network {
          *
          * @return float the cross entropy result
          */
-        float cross_entropy(const std::vector<float> &y, const std::vector<float> &y_hat);
+        float cross_entropy(const std::vector<int> &y, const std::vector<float> &y_hat);
+
+        /**
+         * Simple error calculation for each neuron in the output
+         *
+         * @param const std::vector<int> &y the known labels
+         * @param const std::vector<int> &y_hat the network output
+         *
+         * @return std::vector<float> the error for each output
+         */
+        std::vector<float> simple_error(const std::vector<int> &y, const std::vector<float> &y_hat);
     } // namespace cost
 } // namspace network
 

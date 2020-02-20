@@ -12,6 +12,7 @@
 #include <iostream>
 #include "network/cost.h"
 #include "network/multilayer_perceptron.h"
+#include "iris/dataset.h"
 
 /**
  * The fully-qualified name for all methods can get long; too long
@@ -48,23 +49,64 @@ void mlp::add_layer(const int nodes, const network::activation::kind kind) {
  * @param float l_rate ratio used for applying the gradient
  * @param bool verbose to output progress to std::cout
  */
-void mlp::train(std::vector<std::vector<float>> &v, int epochs, float l_rate, bool verbose) {
+void mlp::train(iris::dataset &data, int epochs, float l_rate, bool verbose) {
     float error = 0.0f;
     float change = 0.0f;
+
+    std::vector<std::vector<float>> &v = data.training;
 
     for (int i = 0; i < epochs; i++) {
         float curr_error = 0.0f;
         for (int j = 0; j < v.size(); j += 2) {
-            _feedforward(v[j]);
+            std::vector<float> a(v[j].begin(), v[j].begin() + 4);
+
+            if (verbose) {
+                std::cout << "Training new example: " << data.name(v[j][4]) << " (";
+
+                for (int y_val : data.expected_vector(v[j][4])) {
+                    std::cout << y_val << ", ";
+                }
+
+                std::cout << ") ... ";
+            }
+
+            _feedforward(a);
+
+            if (verbose) { std::cout << "("; }
 
             std::vector<float> y_hat;
             for (network::unit u : _layers[_layers.size() - 1]) {
+                if (verbose) {
+                    std::cout << u.activation << ", ";
+                }
+
                 y_hat.push_back(u.activation);
             }
 
-            curr_error += network::cost::cross_entropy(v[j + 1], y_hat);
+            if (verbose) { std::cout << std::endl; }
 
-            _backpropagate(v[j], error, l_rate);
+            // float sum =  network::cost::cross_entropy(data.expected_vector(v[j][4]), y_hat);
+            std::vector<float> e_vector = network::cost::simple_error(data.expected_vector(v[j][4]), y_hat);
+            float sum = std::accumulate(e_vector.begin(), e_vector.end(), 0.0f);
+
+            if (verbose) {
+                for (auto f : e_vector) {
+                    std::cout << f << ", ";
+                }
+                std::cout << std::endl;
+
+                std::cout << "E: " << sum << std::endl;
+            }
+
+            if (verbose) {
+                std::cout << "Error: " << sum << std::endl;
+            }
+
+            curr_error += sum;
+
+            _backpropagate(a, e_vector, l_rate);
+
+            verbose = false;
         }
 
         change = error == 0.0f ? curr_error : curr_error - error;
@@ -81,10 +123,19 @@ void mlp::train(std::vector<std::vector<float>> &v, int epochs, float l_rate, bo
  *
  * @param std::vector<float> &input
  *
- * @return float the prediction
+ * @return std::vector<float> the prediction
  */
-void mlp::predict(std::vector<float> &input) {
-    _feedforward(input);
+std::vector<float> mlp::predict(std::vector<float> &input) {
+    std::vector<float> a(input.begin(), input.begin() + 4);
+    _feedforward(a);
+
+    std::vector<float> res;
+
+    for (network::unit u : _layers[_layers.size() - 1]) {
+        res.push_back(u.activation);
+    }
+
+    return res;
 }
 
 /**
@@ -129,6 +180,41 @@ void mlp::_backpropagate(std::vector<float> &v, float error, float l_rate) {
             if (j < _layers.size() - 1) {
                 float error = 0.0f;
 
+                for (int k = 0; k < _layers[j + 1].size(); k++) {
+                    error += _layers[j + 1][k].weights[i] * _layers[j + 1][k].gradient;
+                }
+            }
+
+            _layers[j][i].gradient = error * network::activation::derivative(_layers[j][i].activation, _layers[j][i].kind);
+        }
+    }
+
+    for (int j = 0; j < _layers.size(); j++) {
+        for (int i = 0; i < (j == 0 ? v.size() : _layers[j].size()); i++) {
+            for (int k = 0; k < _layers[j][i].weights.size(); k++) {
+                _layers[j][i].weights[i] += l_rate * _layers[j][i].gradient * (j == 0 ? v[i] : _layers[j - 1][i].activation);
+            }
+
+            // _layers[j][i].bias += l_rate * _layers[j][i].gradient;
+        }
+    }
+}
+
+/**
+ * Perform a one-time backpropagation after a feedforward pass
+ *
+ * @param const std::vector<float> &v the vector used during feedforwarding
+ * @param float error the cross entropy error
+ * @param float l_rate the learning rate with which to apply the gradient
+ */
+void mlp::_backpropagate(std::vector<float> &v, std::vector<float> &e, float l_rate) {
+    for (int j = _layers.size() - 1; j > -1; j--) {
+        for (int i = 0; i < _layers[j].size(); i++) {
+            float error = 0.0f;
+
+            if (j == _layers.size() - 1) {
+                error = e[i];
+            } else if (j < _layers.size() - 1) {
                 for (int k = 0; k < _layers[j + 1].size(); k++) {
                     error += _layers[j + 1][k].weights[i] * _layers[j + 1][k].gradient;
                 }
