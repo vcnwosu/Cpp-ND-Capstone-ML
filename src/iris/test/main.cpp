@@ -1,11 +1,21 @@
 #include <cassert>
 #include <iostream>
-#include "dataset/dataset.h"
+#include "iris/dataset.h"
 
 int main(void) {
     std::cout << "Testing dataset's ability to parse the Iris data... ";
 
-    dataset data("../../../data/iris.data");
+    iris::dataset data("../../../data/iris.data");
+
+    /**
+     * expect the labels to be organized correclty and can be retrieved correctly
+     */
+    assert(data.label("Iris-setosa") == 0);
+    assert(data.label("Iris-versicolor") == 1);
+    assert(data.label("Iris-virginica") == 2);
+    assert(data.name(0) == "Iris-setosa");
+    assert(data.name(1) == "Iris-versicolor");
+    assert(data.name(2) == "Iris-virginica");
 
     /**
      * there should be a total of 150 testing and training examples
