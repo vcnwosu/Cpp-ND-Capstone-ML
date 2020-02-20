@@ -20,28 +20,6 @@ Running the `./capstone` executable will simply run through an automated process
 
 Since the data is shuffled on each instantiation, running `./capstone` should result in a different output each time, while still performing the same automated load, train test process.
 
-## Project Structure
-
-The project heirarcy is as such:
-.
-|-- **data** _(containing iris data set files)_
-|-- **src**
-|   |-- **iris**
-|   |   |-- **include**
-|   |   |-- **lib**
-|   |   |-- **src**
-|   |   |-- **test**
-|   |   |-- CMakeLists.txt
-|   |-- **network**
-|   |   |-- **include**
-|   |   |-- **lib**
-|   |   |-- **src**
-|   |   |-- **test**
-|   |   |-- CMakeLists.txt
-|   |-- main.cpp
-|-- CMakeLists.txt
-|-- README.md
-
 ## Dependencies
 
 * cmake >= 2.8
